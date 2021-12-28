@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/toolbarMenuSearch"
+        android:icon="@drawable/ic_baseline_search_24"
+        android:title="Search"
+        app:showAsAction="always"
+        app:actionViewClass="android.widget.SearchView"
+        android:iconTint="@color/md_theme_light_onPrimary"/>
+    <item
+        android:id="@+id/toolbarMenuSettings"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="Settings"
+        app:showAsAction="always"
+        android:iconTint="@color/md_theme_light_onPrimary"/>
+    <item
+        android:id="@+id/toolbarMenuAbout"
+        android:title="About"
+        app:showAsAction="never"
+        android:iconTint="@color/md_theme_light_onPrimary"/>
+    <item
+        android:id="@+id/toolbarMenuExit"
+        android:title="Exit"
+        app:showAsAction="never"
+        android:iconTint="@color/md_theme_light_onPrimary"/>
+</menu>
