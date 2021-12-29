@@ -1,5 +1,6 @@
 package com.example.todoandpomodoro
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -23,6 +24,8 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        readData()
+        taskNumber = taskList.size + 1
 
         toolbar.title = "TODO"
         setSupportActionBar(toolbar)
@@ -79,6 +82,7 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
                 startActivity(settingsScreen)
             }
             R.id.toolbarMenuExit -> {
+                saveData()
                 finish()
             }
             else -> return super.onOptionsItemSelected(item)
@@ -97,4 +101,31 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         return true
     }
 
+    fun saveData(){
+        val sp = getSharedPreferences("tasks", Context.MODE_PRIVATE)
+        val editor = sp.edit()
+        val taskHasHSet = HashSet<String>()
+        taskList.forEach { item ->
+            taskHasHSet.add("${item.taskNumber};${item.task}")
+        }
+        editor.putStringSet("tasks",taskHasHSet)
+
+        editor.apply()
+
+    }
+
+    fun readData() {
+        val sp = getSharedPreferences("tasks", Context.MODE_PRIVATE)
+        val list = sp.getStringSet("tasks",null)
+        var domain : String?
+
+        if(list != null) {
+            for(a in list) {
+                domain = a.substringAfterLast(";")
+                Log.e("${taskNumber}",domain)
+                taskList.add(Task(taskNumber, domain))
+                taskNumber++
+            }
+        }
+    }
 }
