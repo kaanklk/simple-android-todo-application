@@ -10,7 +10,6 @@ import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.add_new_task.view.*
-import java.io.File
 import kotlin.Exception
 
 class RecycleViewAdapter(private val mContext: Context, private val TaskList:ArrayList<Task>)
@@ -38,53 +37,63 @@ class RecycleViewAdapter(private val mContext: Context, private val TaskList:Arr
     override fun onBindViewHolder(holder: CardViewDesignItemHolder, position: Int) {
         val task = TaskList[position]
         holder.rowText.text = task.task
-        holder.rowCardView.setOnClickListener {
-            Toast.makeText(mContext,"You have clicked your task!",Toast.LENGTH_SHORT).show()
-        }
+
         holder.rowMenu.setOnClickListener {
-            val popup = PopupMenu(mContext,holder.rowMenu)
-            popup.menuInflater.inflate(R.menu.task_popup_menu,popup.menu)
-            popup.show()
+            setupPopUpMenu(holder,position)
+        }
+    }
 
-            popup.setOnMenuItemClickListener { item->
-                when(item.itemId) {
-                    R.id.taskPopupMenuDelete -> {
-                        try {
-                            TaskList.removeAt(position)
-                            notifyItemRemoved(position)
-                            notifyItemRangeChanged(position,TaskList.size)
-                        }catch (e:Exception) {
-                            Log.e("ERROR","Something went wrong'!")
-                        }
+    private fun setupPopUpMenu(holder: CardViewDesignItemHolder,position: Int) {
+        val popup = PopupMenu(mContext,holder.rowMenu)
+        popup.menuInflater.inflate(R.menu.task_popup_menu,popup.menu)
+        popup.show()
 
-                        true
-                    }
-                    R.id.taskPopupMenuEdit -> {
-                        val editedItem = TaskList[position]
-                        val design = LayoutInflater.from(mContext).inflate(R.layout.add_new_task,null)
-                        val newTaskAlert = AlertDialog.Builder(mContext)
-                        newTaskAlert.setIcon(R.drawable.ic_baseline_edit_24)
-                        newTaskAlert.setView(design)
-                        newTaskAlert.setPositiveButton("Edit") {_,_ ->
-                            val taskText = design.editTextNewTaskTaskName.text
-                            if (taskText.toString() == "") {
-                                Toast.makeText(mContext,"Please write a task",Toast.LENGTH_SHORT).show()
-                            }
-                            else {
-                                editedItem.task = taskText.toString()
-                                notifyItemChanged(position)
-                            }
-                        }
-                        newTaskAlert.setNegativeButton("Cancel") {_,_ ->
-                            Toast.makeText(mContext,"Cancel",Toast.LENGTH_SHORT).show()
-                        }
-                        newTaskAlert.create().show()
-                        true
-                    }
-                    else -> false
+        popup.setOnMenuItemClickListener { item->
+            when(item.itemId) {
+                R.id.taskPopupMenuDelete -> {
+                    popUpMenuDeleteButtonBehaviour(position)
+                    true
                 }
+                R.id.taskPopupMenuEdit -> {
+                    popUpMenuEditButtonBehaviour(position)
+                    true
+                }
+                else -> false
             }
         }
+    }
+
+    private fun popUpMenuEditButtonBehaviour(position: Int) {
+        val editedItem = TaskList[position]
+        val design = LayoutInflater.from(mContext).inflate(R.layout.add_new_task,null)
+        val newTaskAlert = AlertDialog.Builder(mContext)
+        newTaskAlert.setIcon(R.drawable.ic_baseline_edit_24)
+        newTaskAlert.setView(design)
+        newTaskAlert.setPositiveButton("Edit") {_,_ ->
+            val taskText = design.editTextNewTaskTaskName.text
+            if (taskText.toString() == "") {
+                Toast.makeText(mContext,"Please write a task",Toast.LENGTH_SHORT).show()
+            }
+            else {
+                editedItem.task = taskText.toString()
+                notifyItemChanged(position)
+            }
+        }
+        newTaskAlert.setNegativeButton("Cancel") {_,_ ->
+            Toast.makeText(mContext,"Cancel",Toast.LENGTH_SHORT).show()
+        }
+        newTaskAlert.create().show()
+    }
+
+    private fun popUpMenuDeleteButtonBehaviour(position: Int) {
+        try {
+            TaskList.removeAt(position)
+            notifyItemRemoved(position)
+            notifyItemRangeChanged(position,TaskList.size)
+        }catch (e:Exception) {
+            Log.e("ERROR","Something went wrong'!")
+        }
+
     }
 
     override fun getItemCount(): Int {

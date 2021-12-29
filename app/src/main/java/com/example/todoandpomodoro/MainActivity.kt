@@ -24,42 +24,13 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setupToolbar()
         readData()
-
-        toolbar.title = "TODO"
-        setSupportActionBar(toolbar)
-
-        adapter = RecycleViewAdapter(this,taskList)
-        recyclerViewTodo.setHasFixedSize(true)
-        recyclerViewTodo.layoutManager = LinearLayoutManager(this)
-        recyclerViewTodo.adapter = adapter
+        setupRecyclerView()
 
         buttonNewTask.setOnClickListener {
-
-            val design = layoutInflater.inflate(R.layout.add_new_task,null)
-            val newTaskAlert = AlertDialog.Builder(this@MainActivity)
-            newTaskAlert.setIcon(R.drawable.ic_baseline_edit_24)
-            newTaskAlert.setView(design)
-            newTaskAlert.setPositiveButton("Add") { _, _ ->
-                val taskText = design.editTextNewTaskTaskName.text
-                if (taskText.toString() == "") {
-                    Toast.makeText(this@MainActivity,"Please write a task",Toast.LENGTH_SHORT).show()
-                }
-                else {
-                    taskList.add(Task(taskNumber,taskText.toString()))
-                    saveData()
-                    taskNumber = taskList.size
-                    recyclerViewTodo.adapter = adapter
-                }
-
-            }
-            newTaskAlert.setNegativeButton("Cancel") { _, _ ->
-                Toast.makeText(this@MainActivity,"Cancel",Toast.LENGTH_SHORT).show()
-            }
-
-            newTaskAlert.create().show()
+            createNewTask()
         }
-
 
     }
 
@@ -68,7 +39,6 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         val item = menu!!.findItem(R.id.toolbarMenuSearch)
         val searchView = item.actionView as SearchView
         searchView.setOnQueryTextListener(this)
-
         return true
     }
 
@@ -100,6 +70,44 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         return true
     }
 
+    private fun setupToolbar(){
+        toolbar.title = "TODO"
+        setSupportActionBar(toolbar)
+    }
+
+    private fun setupRecyclerView() {
+        adapter = RecycleViewAdapter(this,taskList)
+        recyclerViewTodo.setHasFixedSize(true)
+        recyclerViewTodo.layoutManager = LinearLayoutManager(this)
+        recyclerViewTodo.adapter = adapter
+
+    }
+
+    private fun createNewTask() {
+        val design = layoutInflater.inflate(R.layout.add_new_task,null)
+        val newTaskAlert = AlertDialog.Builder(this@MainActivity)
+        newTaskAlert.setIcon(R.drawable.ic_baseline_edit_24)
+        newTaskAlert.setView(design)
+        newTaskAlert.setPositiveButton("Add") { _, _ ->
+            val taskText = design.editTextNewTaskTaskName.text
+            if (taskText.toString() == "") {
+                Toast.makeText(this@MainActivity,"Please write a task",Toast.LENGTH_SHORT).show()
+            }
+            else {
+                taskList.add(Task(taskNumber,taskText.toString()))
+                saveData()
+                taskNumber = taskList.size
+                recyclerViewTodo.adapter = adapter
+            }
+
+        }
+        newTaskAlert.setNegativeButton("Cancel") { _, _ ->
+            Toast.makeText(this@MainActivity,"Cancel",Toast.LENGTH_SHORT).show()
+        }
+
+        newTaskAlert.create().show()
+    }
+
     override fun onPause() {
         saveData()
         super.onPause()
@@ -110,6 +118,16 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         super.onDestroy()
     }
 
+    override fun finish() {
+        saveData()
+        super.finish()
+    }
+
+    override fun onBackPressed() {
+        finish()
+        super.onBackPressed()
+    }
+
     private fun saveData(){
         val sp = getSharedPreferences("tasks", Context.MODE_PRIVATE)
         val editor = sp.edit()
@@ -118,7 +136,6 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
             taskHasHSet.add(item.task)
         }
         editor.putStringSet("tasks",taskHasHSet)
-
         editor.apply()
 
     }
@@ -129,10 +146,11 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
         if(list != null) {
             for(a in list) {
-                Log.e("${taskNumber}",a)
+                Log.e("$taskNumber",a)
                 taskList.add(Task(taskNumber, a))
                 taskNumber++
             }
         }
     }
+
 }
