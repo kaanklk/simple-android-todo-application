@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         setContentView(R.layout.activity_main)
 
         readData()
-        taskNumber = taskList.size + 1
 
         toolbar.title = "TODO"
         setSupportActionBar(toolbar)
@@ -48,7 +47,8 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
                 }
                 else {
                     taskList.add(Task(taskNumber,taskText.toString()))
-                    taskNumber++
+                    saveData()
+                    taskNumber = taskList.size
                     recyclerViewTodo.adapter = adapter
                 }
 
@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
                 startActivity(settingsScreen)
             }
             R.id.toolbarMenuExit -> {
-                saveData()
                 finish()
             }
             else -> return super.onOptionsItemSelected(item)
@@ -101,12 +100,22 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         return true
     }
 
-    fun saveData(){
+    override fun onPause() {
+        saveData()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        saveData()
+        super.onDestroy()
+    }
+
+    private fun saveData(){
         val sp = getSharedPreferences("tasks", Context.MODE_PRIVATE)
         val editor = sp.edit()
         val taskHasHSet = HashSet<String>()
         taskList.forEach { item ->
-            taskHasHSet.add("${item.taskNumber};${item.task}")
+            taskHasHSet.add(item.task)
         }
         editor.putStringSet("tasks",taskHasHSet)
 
@@ -114,16 +123,14 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
     }
 
-    fun readData() {
+    private fun readData() {
         val sp = getSharedPreferences("tasks", Context.MODE_PRIVATE)
         val list = sp.getStringSet("tasks",null)
-        var domain : String?
 
         if(list != null) {
             for(a in list) {
-                domain = a.substringAfterLast(";")
-                Log.e("${taskNumber}",domain)
-                taskList.add(Task(taskNumber, domain))
+                Log.e("${taskNumber}",a)
+                taskList.add(Task(taskNumber, a))
                 taskNumber++
             }
         }
